@@ -1,25 +1,29 @@
 var width = 400,
     height = 100;
 
-var text = "FUCK";
+var text = "FUCK YOU";
 
 var fonts = [ 'Roboto', 'Rozha One', 'Open Sans', 'Roboto Condensed', 'Oswald', 'Lora', 'Open Sans Condensed',
     'Barlow Condensed', 'Playfair Display', 'Barlow', 'Barlow Semi Condensed', 'PT Sans Narrow', 'Poppins',
     'Indie Flower', 'Anton', 'Fjalla One', 'Lobster', 'Spirax', 'Abril Fatface' ];
 var weights = [ 'normal', 'bold', 'bolder', 'lighter' ];
 
+var colorPrimary = '#00de08';
+var colorSecondary = '#009f08';
+
 var background = new Path({
     segments: [[0, 0],[width, 0], [width, height], [0, height]]
 });
-background.fillColor = '#2851ee';
+background.fillColor = colorPrimary;
 
 var polyList = [];
+var polyData = [];
 var currentX1 = -25;
 var currentX2 = 25;
 var currentY1 = -25;
 var currentY2 = 25;
 var deltaX = 50;
-for(var r=0; r<3; r++){
+for(var r=0; r<4; r++){
     for(var c=0; c<20; c++){
         var patternPath = new Path();
         patternPath.fillColor = getRandomColor();
@@ -32,12 +36,22 @@ for(var r=0; r<3; r++){
         patternPath.closed = true;
         currentX1 += deltaX;
         currentX2 += deltaX;
+        var data = {
+            rotation: getDecRandomNumber(0, 2),
+            currentScaleX: 0,
+            maxScaleX: 1 + getDecRandomNumber(0, 2),
+            scaleXstep: 0.003,
+        };
+
+
         polyList.push(patternPath);
+        polyData.push(data);
+        polyData.push(data);
     }
     currentX1 = -25;
     currentX2 = 25;
-    currentY1 += 50;
-    currentY2 += 50;
+    currentY1 += 35;
+    currentY2 += 35;
 }
 
 currentX1 = -25;
@@ -45,10 +59,8 @@ currentX2 = 25;
 currentY1 = 25;
 currentY2 = -25;
 
-for(var r=0; r<3; r++){
+for(var r=0; r<4; r++){
     for(var c=0; c<20; c++){
-        var patternPath = new Path();
-        patternPath.fillColor = getRandomColor();
         var x1, x2, x3;
         if(c == 0){
             x1 = currentX1;
@@ -60,21 +72,35 @@ for(var r=0; r<3; r++){
             x3 = polyList[r * 20 + c].segments[0].point.x;
         }
 
+        var patternPath = new Path();
         patternPath.add(new Point(x1, currentY1));
         patternPath.add(new Point(x2, currentY1));
         patternPath.add(new Point(x3, currentY2));
         patternPath.closed = true;
-        patternPath.closed = true;
+
+        patternPath.fillColor = {
+            gradient: {
+                stops: [getRandomColor(), getRandomColor()],
+            },
+            origin: patternPath.bounds.topLeft,
+            destination: patternPath.bounds.bottomRight
+        };
         currentX1 += deltaX;
         currentX2 += deltaX;
+        var data = {
+            rotation: getDecRandomNumber(0, 2),
+            currentScaleX: 1,
+            maxScaleX: 1 + getDecRandomNumber(0, 0.5)
+        };
 
         polyList.push(patternPath);
+        polyData.push(data);
     }
 
     currentX1 = -25;
     currentX2 = 25;
-    currentY1 += 50;
-    currentY2 += 50;
+    currentY1 += 35;
+    currentY2 += 35;
 }
 
 
@@ -100,18 +126,28 @@ for(var i=0; i<text.length; i++){
         fontSize = getRandomNumber(30, 50);
 
     char.style = {
-        fontFamily: fonts[font],
+        fontFamily: 'arial',//fonts[font],
         fontWeight: weight[weight],
         fontSize: fontSize,
-        fillColor: '#f1ffff',
+        fillColor: {
+            gradient: {
+                stops: [colorPrimary, colorSecondary],
+            },
+            origin: new Point(charLocation.x + 10 + dX, dY - 20),
+            destination: new Point(charLocation.x + 10 + dX + 20, dY + 20)
+        },
         justification: 'left'
     };
+
+    char.opacity = 1;
+
+    console.log(char);
 
     var rotation = getRandomNumber(-120, 120),
         skew = getRandomNumber(0, 6);
 
-    char.rotate(rotation, charLocation);
-    char.skew(new Point(skew, posY)); //TODO: learn how the fuck this shit works
+    //char.rotate(rotation, charLocation);
+    //char.skew(new Point(skew, posY)); //TODO: learn how the fuck this shit works
     char.content = text[i];
     characters.push(char);
 }
@@ -119,35 +155,32 @@ for(var i=0; i<text.length; i++){
 
 var maxRotation = 180,
     currentRotation = 0,
-    rotation = 1;
+    rotation = 0.1;
 
 var maxXtranslate = 400,
     currentXtranslate = 0,
-    xTranslate = 1;
+    xTranslate = 0.3;
 
 var maxYtranslate = 100,
     currentYtranslate = 0,
-    yTranslate = 1;
+    yTranslate = 0.5;
 
 function onFrame(event) {
     //background.fillColor.hue += 0.5;
     for(var i=0; i<characters.length; i++){
         characters[i].rotate(rotation);
-        characters[i].translate(xTranslate, yTranslate);
-
-        if(event.count % text.length == i){
-            characters[i].visible = !characters[i].visible;
-        }
+        //characters[i].translate(xTranslate, yTranslate);
 
         incrementCounters();
         checkBorders();
     }
 
     for(var i=0; i<polyList.length; i++){
-        var speed = i < 20 ? 2 :
-                    i < 40 ? 0.5 : -2;
-        polyList[i].rotate(speed);
-        //polyList[i].translate(xTranslate, yTranslate);
+        polyList[i].rotate(polyData[i].rotation / 3);
+
+        polyData[i].currentScaleX = polyData[i].currentScaleX + polyData[i].scaleXstep;
+        polyList[i].scale(1 + polyData[i].scaleXstep, 1 + polyData[i].scaleXstep);
+        checkPolyBorders(i);
     }
 }
 
@@ -155,6 +188,13 @@ function incrementCounters() {
     currentRotation++;
     currentXtranslate++;
     currentYtranslate++;
+}
+
+function checkPolyBorders(i) {
+    if(Math.abs(polyData[i].currentScaleX) > Math.abs(polyData[i].maxScaleX)){
+        polyData[i].scaleXstep = -polyData[i].scaleXstep;
+        polyData[i].currentScaleX = 0;
+    }
 }
 
 function checkBorders(){
@@ -170,15 +210,22 @@ function checkBorders(){
         yTranslate = -yTranslate;
         currentYtranslate = 0;
     }
+
+
 }
 
 function getRandomNumber(minNumber, maxNumber) {
     return Math.floor((Math.random() * maxNumber) + minNumber);
 }
 
+function getDecRandomNumber(minNumber, maxNumber) {
+    var sign = getRandomNumber(0, 2) == 0 ? -1 : 1;
+    return sign * ((Math.random() * maxNumber) + minNumber);
+}
+
 function getRandomColor(){
-    var rgb1 = rgb("#2851ee");
-    var rgb2 = rgb("#268fee");
+    var rgb1 = rgb(colorPrimary);
+    var rgb2 = rgb(colorSecondary);
     var rgb3 = [];
     for (var i=0; i<3; i++) rgb3[i] = rgb1[i]+Math.random()*(rgb2[i]-rgb1[i])|0;
 
