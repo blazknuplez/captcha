@@ -1,15 +1,19 @@
 var width = 400,
     height = 100;
 
-var text = "FUCK YOU";
+var text = "";
+
+for(var i=0; i<6; i++){
+    text += getUnicodeChar();
+}
 
 var fonts = [ 'Roboto', 'Rozha One', 'Open Sans', 'Roboto Condensed', 'Oswald', 'Lora', 'Open Sans Condensed',
     'Barlow Condensed', 'Playfair Display', 'Barlow', 'Barlow Semi Condensed', 'PT Sans Narrow', 'Poppins',
     'Indie Flower', 'Anton', 'Fjalla One', 'Lobster', 'Spirax', 'Abril Fatface' ];
 var weights = [ 'normal', 'bold', 'bolder', 'lighter' ];
 
-var colorPrimary = '#00de08';
-var colorSecondary = '#009f08';
+var colorPrimary = '#5696e6';
+var colorSecondary = '#3c86e6';
 
 var background = new Path({
     segments: [[0, 0],[width, 0], [width, height], [0, height]]
@@ -24,9 +28,8 @@ var currentY1 = -25;
 var currentY2 = 25;
 var deltaX = 50;
 for(var r=0; r<4; r++){
-    for(var c=0; c<20; c++){
+    for(var c=0; c<15; c++){
         var patternPath = new Path();
-        patternPath.fillColor = getRandomColor();
         var x1, x2;
         x1 = c == 0 ? currentX1 : polyList[polyList.length - 1].segments[1].point.x;
         x2 = getRandomNumber(10, 50);
@@ -36,13 +39,20 @@ for(var r=0; r<4; r++){
         patternPath.closed = true;
         currentX1 += deltaX;
         currentX2 += deltaX;
+        patternPath.fillColor = {
+            gradient: {
+                stops: [colorPrimary, getRandomColor()],
+            },
+            origin: patternPath.bounds.topLeft,
+            destination: patternPath.bounds.bottomRight
+        };
+
         var data = {
             rotation: getDecRandomNumber(0, 2),
             currentScaleX: 0,
-            maxScaleX: 1 + getDecRandomNumber(0, 2),
+            maxScaleX: getDecRandomNumber(0, 2),
             scaleXstep: 0.003,
         };
-
 
         polyList.push(patternPath);
         polyData.push(data);
@@ -60,7 +70,7 @@ currentY1 = 25;
 currentY2 = -25;
 
 for(var r=0; r<4; r++){
-    for(var c=0; c<20; c++){
+    for(var c=0; c<15; c++){
         var x1, x2, x3;
         if(c == 0){
             x1 = currentX1;
@@ -80,7 +90,7 @@ for(var r=0; r<4; r++){
 
         patternPath.fillColor = {
             gradient: {
-                stops: [getRandomColor(), getRandomColor()],
+                stops: [colorPrimary, getRandomColor()],
             },
             origin: patternPath.bounds.topLeft,
             destination: patternPath.bounds.bottomRight
@@ -89,8 +99,9 @@ for(var r=0; r<4; r++){
         currentX2 += deltaX;
         var data = {
             rotation: getDecRandomNumber(0, 2),
-            currentScaleX: 1,
-            maxScaleX: 1 + getDecRandomNumber(0, 0.5)
+            currentScaleX: 0,
+            maxScaleX: getDecRandomNumber(0, 2),
+            scaleXstep: 0.003
         };
 
         polyList.push(patternPath);
@@ -105,20 +116,21 @@ for(var r=0; r<4; r++){
 
 
 
-var posX = width / 2,
+var posX = -20,
     posY = height / 2,
-    dX = getRandomNumber(40, 140),
-    dY;
+    dX = getDecRandomNumber(0, 20),
+    dY = 45;
 
-var charLocation = new Point(-dX + posX, posY),
+var charLocation,
     char,
-    characters = [];
+    characters = [],
+    charData = [];
 
 for(var i=0; i<text.length; i++){
-    dX = getRandomNumber(10, 40);
-    dY = getRandomNumber(45, height - 45);
+    dX += getRandomNumber(20, 40);
+    dY = 30 + (dY + getDecRandomNumber(0, 40)) % 60;
 
-    charLocation = new Point(charLocation.x + 10 + dX, dY);
+    charLocation = new Point(dX, dY);
     char = new PointText(charLocation);
 
     var font = getRandomNumber(0, fonts.length),
@@ -126,51 +138,81 @@ for(var i=0; i<text.length; i++){
         fontSize = getRandomNumber(30, 50);
 
     char.style = {
-        fontFamily: 'arial',//fonts[font],
+        fontFamily: fonts[font],
         fontWeight: weight[weight],
         fontSize: fontSize,
         fillColor: {
             gradient: {
-                stops: [colorPrimary, colorSecondary],
+                stops: [colorSecondary, colorSecondary],
             },
-            origin: new Point(charLocation.x + 10 + dX, dY - 20),
-            destination: new Point(charLocation.x + 10 + dX + 20, dY + 20)
+            origin: new Point(charLocation.x, charLocation.y),
+            destination: new Point(charLocation.x + 20, dY + 20)
         },
         justification: 'left'
     };
 
-    char.opacity = 1;
+    char.opacity = 0.75;
 
-    console.log(char);
+    var rotation = getRandomNumber(0, 40),
+        skewX = getDecRandomNumber(0, 20),
+        skewY = getDecRandomNumber(0, 20);
 
-    var rotation = getRandomNumber(-120, 120),
-        skew = getRandomNumber(0, 6);
-
-    //char.rotate(rotation, charLocation);
-    //char.skew(new Point(skew, posY)); //TODO: learn how the fuck this shit works
+    char.rotate(rotation);
+    char.skew(new Point(skewX, skewY));
     char.content = text[i];
+
+    var data = {
+        currentSkew: 0,
+        maxSkew: getDecRandomNumber(0, 30),
+        skewStep: getDecRandomNumber(0, 0.1),
+        rotationStep: getDecRandomNumber(0, 1),
+        currentScale: 0,
+        maxScale: getDecRandomNumber(0, 0.5),
+        scaleStep: 0.005,
+        visibilityStep: getRandomNumber(50, 100),
+        visibilityDuration: getRandomNumber(0, 60)
+    };
+
+    console.log(data);
+
+    charData.push(data);
     characters.push(char);
 }
 
 
 var maxRotation = 180,
     currentRotation = 0,
-    rotation = 0.1;
+    rotation = 0;
 
 var maxXtranslate = 400,
     currentXtranslate = 0,
-    xTranslate = 0.3;
+    xTranslate = 0;
 
 var maxYtranslate = 100,
     currentYtranslate = 0,
-    yTranslate = 0.5;
+    yTranslate = 0;
+
+var skew = new Point(1, 1);
 
 function onFrame(event) {
     //background.fillColor.hue += 0.5;
     for(var i=0; i<characters.length; i++){
-        characters[i].rotate(rotation);
-        //characters[i].translate(xTranslate, yTranslate);
+        characters[i].rotate(Math.sin(event.count / (charData[i].rotationStep * 35)));
+        characters[i].translate(xTranslate, yTranslate);
 
+        charData[i].currentScale += charData[i].scaleStep;
+        characters[i].scale(1 + charData[i].scaleStep, 1 + charData[i].scaleStep);
+
+        charData[i].currentSkew += charData[i].skewStep;
+        characters[i].skew(new Point(charData[i].skewStep, charData[i].skewStep));
+
+        if(event.count % 150 == charData[i].visibilityStep)
+            characters[i].visible = false;
+        else if (event.count % 150 == (charData[i].visibilityStep + charData[i].visibilityDuration) % 150)
+            characters[i].visible = true;
+
+
+        checkCharBorders(i);
         incrementCounters();
         checkBorders();
     }
@@ -190,8 +232,21 @@ function incrementCounters() {
     currentYtranslate++;
 }
 
+function checkCharBorders(i){
+    if(Math.abs(charData[i].currentScale) > Math.abs(charData[i].maxScale)){
+        charData[i].scaleStep = -charData[i].scaleStep;
+        charData[i].currentScale = 0;
+    }
+
+    if(Math.abs(charData[i].currentSkew) > Math.abs(charData[i].maxSkew)){
+        charData[i].skewStep = -charData[i].skewStep;
+        charData[i].currentSkew = 0;
+    }
+}
+
 function checkPolyBorders(i) {
-    if(Math.abs(polyData[i].currentScaleX) > Math.abs(polyData[i].maxScaleX)){
+
+    if(Math.abs(polyData[i].currentScaleX) > Math.abs(polyData[i].maxScaleX )){
         polyData[i].scaleXstep = -polyData[i].scaleXstep;
         polyData[i].currentScaleX = 0;
     }
@@ -238,4 +293,8 @@ function getRandomColor(){
 
 function rgb(string){
     return string.match(/\w\w/g).map(function(b){ return parseInt(b,16) })
+}
+
+function getUnicodeChar(){
+    return String.fromCharCode(0x30A0 + Math.random() * (0x30FF-0x30A0+1));
 }
