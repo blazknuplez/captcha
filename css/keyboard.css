@@ -1,0 +1,33 @@
+.character{
+    display: inline-block;
+    margin: 2px;
+    border: 1px solid;
+    min-width: 25px;
+    text-align: center;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.character:hover {
+    background-color: #cccccc;
+    cursor: pointer;
+}
+
+#input {
+    margin-left: 9px;
+    padding: 2px;
+    width: 320px;
+}
+
+#keyboard{
+    margin-top: 10px;
+    width: 400px;
+    text-align: center;
+}
+
+canvas{
+    margin-bottom: 10px;
+}

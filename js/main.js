@@ -13,7 +13,7 @@ var fonts = [ 'Roboto', 'Rozha One', 'Open Sans', 'Roboto Condensed', 'Oswald', 
 var weights = [ 'normal', 'bold', 'bolder', 'lighter' ];
 
 var colorPrimary = '#5696e6';
-var colorSecondary = '#3c86e6';
+var colorSecondary = '#064ee6';
 
 var background = new Path({
     segments: [[0, 0],[width, 0], [width, height], [0, height]]
@@ -296,5 +296,34 @@ function rgb(string){
 }
 
 function getUnicodeChar(){
-    return String.fromCharCode(0x30A0 + Math.random() * (0x30FF-0x30A0+1));
+    return String.fromCharCode(0x2600 + Math.random() * (0x2B50-0x2600+1));
 }
+
+////////////////////
+var keyboardText = "" + text;
+for(var i=0; i<30 - text.length; i++){
+    var char = getUnicodeChar();
+    while(text.indexOf(char) >= 0){
+        char = getUnicodeChar();
+    }
+    keyboardText += char;
+}
+
+keyboardText = keyboardText.split('').sort(function(){return 0.5-Math.random()}).join('');
+console.log(keyboardText);
+for(var i=0; i<3; i++){
+    for(var j=0; j<10; j++){
+        $("#keyboard").append("<span class='character'>" + keyboardText[i * 10 + j] + "</span>");
+    }
+    $("#keyboard").append("<br>");
+}
+
+$('body').on('click', 'span.character', function() {
+    var currentVal = $('#input').val();
+    $('#input').val(currentVal + ($(this).text()));
+});
+
+$('body').on('click', 'button', function() {
+    var currentVal = $('#input').val();
+    alert(currentVal == text);
+});

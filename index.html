@@ -13,6 +13,7 @@
 
         <link rel="stylesheet" href="css/normalize.css">
         <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="css/keyboard.css">
 
         <link href="https://fonts.googleapis.com/css?family=Abril+Fatface|Anton|Barlow|Barlow+Condensed|Barlow+Semi+Condensed|Fjalla+One|Indie+Flower|Lobster|Lora|Open+Sans|Open+Sans+Condensed:300|Oswald|PT+Sans+Narrow|Playfair+Display|Poppins|Roboto|Roboto+Condensed|Rozha+One|Slabo+27px|Spirax" rel="stylesheet">
 
@@ -25,7 +26,12 @@
         <![endif]-->
 
         <!-- Add your site or application content here -->
-        <canvas id="canvas" width="400" height="100"></canvas>
+        <div width="400">
+            <canvas id="canvas" width="400" height="100"></canvas><br>
+            <input id="input" type="text" placeholder="write symbols on virtual keyboard..." />
+            <button>Send</button>
+        </div>
+        <div id="keyboard"></div>
 
         <script src="js/vendor/modernizr-3.5.0.min.js"></script>
         <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
