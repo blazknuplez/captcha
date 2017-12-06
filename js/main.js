@@ -1,11 +1,19 @@
 var width = 400,
     height = 100;
 
-var text = "";
+var text = getRandomString();
 
-for(var i=0; i<6; i++){
-    text += getUnicodeChar();
-}
+var canvas = document.getElementById('canvas');
+var context = canvas.getContext('2d');
+var encoder = new GIFEncoder();
+encoder.setRepeat(1);
+//encoder.setSize(400, 200);
+encoder.setQuality(5);
+encoder.setFrameRate(30);
+encoder.start();
+var generating = false;
+
+var frames = 0;
 
 var fonts = [ 'Roboto', 'Rozha One', 'Open Sans', 'Roboto Condensed', 'Oswald', 'Lora', 'Open Sans Condensed',
     'Barlow Condensed', 'Playfair Display', 'Barlow', 'Barlow Semi Condensed', 'PT Sans Narrow', 'Poppins',
@@ -196,6 +204,18 @@ var skew = new Point(1, 1);
 
 function onFrame(event) {
     //background.fillColor.hue += 0.5;
+
+    if(generating && frames < 100){
+        encoder.addFrame(context);
+        frames++;
+        $("span#progress").text(frames + "%");
+    } else if(generating && frames == 100) {
+        generating = false;
+        encoder.finish();
+        var name = $("input#name").val();
+        encoder.download(name);
+    }
+
     for(var i=0; i<characters.length; i++){
         characters[i].rotate(Math.sin(event.count / (charData[i].rotationStep * 35)));
         characters[i].translate(xTranslate, yTranslate);
@@ -299,7 +319,23 @@ function getUnicodeChar(){
     return String.fromCharCode(0x2600 + Math.random() * (0x2B50-0x2600+1));
 }
 
+$('body').on('click', 'button#generate', function() {
+    frames = 0;
+    generating = true;
+});
+
+function getRandomString() {
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for (var i = 0; i < 5; i++)
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+    return text;
+}
+
 ////////////////////
+/*
 var keyboardText = "" + text;
 for(var i=0; i<30 - text.length; i++){
     var char = getUnicodeChar();
@@ -310,7 +346,6 @@ for(var i=0; i<30 - text.length; i++){
 }
 
 keyboardText = keyboardText.split('').sort(function(){return 0.5-Math.random()}).join('');
-console.log(keyboardText);
 for(var i=0; i<3; i++){
     for(var j=0; j<10; j++){
         $("#keyboard").append("<span class='character'>" + keyboardText[i * 10 + j] + "</span>");
@@ -327,3 +362,4 @@ $('body').on('click', 'button', function() {
     var currentVal = $('#input').val();
     alert(currentVal == text);
 });
+*/
